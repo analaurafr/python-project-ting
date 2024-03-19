@@ -1,22 +1,19 @@
-def is_valid_txt_file(path_file):
-    return path_file.endswith(".txt")
+import sys
+import os
 
 
 def txt_importer(path_file):
-    if not is_valid_txt_file(path_file):
-        print("Formato inválido - Arquivo deve ter extensão .txt")
+    if not os.path.exists(path_file):
+        print(f"Arquivo {path_file} não encontrado", file=sys.stderr)
         return []
 
-    try:
-        with open(path_file, "r") as file:
-            lines = file.readlines()
-            return [line.strip() for line in lines]
-    except FileNotFoundError:
-        print(f"Arquivo {path_file} não encontrado")
+    if not path_file.lower().endswith(".txt"):
+        print("Formato inválido", file=sys.stderr)
         return []
-    except IOError:
-        print("Erro ao ler o arquivo")
-        return []
+
+    with open(path_file, "r") as file:
+        lines = file.readlines()
+        return [line.strip() for line in lines]
 
 
 # Exemplo de uso:
