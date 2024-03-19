@@ -1,57 +1,40 @@
-import os
 import sys
 from ting_file_management.file_management import txt_importer
 
 
 def process(path_file, instance):
-    file_data = txt_importer(path_file)
-    file_name = os.path.basename(path_file)
+    file = txt_importer(path_file)
 
-    # Verifica se o arquivo já foi processado anteriormente
-    if file_metadata(instance, file_name):
-        print(
-            f"Arquivo {file_name} já foi processado anteriormente. Ignorando."
-        )
-        return
+    if not isinstance(file, list):
+        return None
 
-    metadata = {
-        "nome_do_arquivo": file_name,
-        "qtd_linhas": len(file_data),
-        "linhas_do_arquivo": file_data,
+    dict_file = {
+        "nome_do_arquivo": path_file,
+        "qtd_linhas": len(file),
+        "linhas_do_arquivo": file,
     }
 
-    # Adiciona os metadados do arquivo à fila
-    instance.enqueue(metadata)
+    if instance.__len__() > 0:
+        for i in range(instance.__len__()):
+            if instance.search(i)["nome_do_arquivo"] == path_file:
+                return None
 
-    # Mostra os dados processados via stdout
-    print(metadata)
+    instance.enqueue(dict_file)
+    sys.stdout.write(str(dict_file))
 
 
 def remove(instance):
-    try:
-        # Remove o primeiro arquivo processado da fila
-        removed_file = instance.dequeue()
-        print(
-            f"Arquivo {removed_file['nome_do_arquivo']} removido com sucesso"
-        )
-    except IndexError:
-        print("Não há elementos")
+    if instance.__len__() == 0:
+        return sys.stdout.write("Não há elementos\n")
 
-
-# Exemplo de uso:
-# remove(minha_fila)
+    patch_file = instance.search(0)["nome_do_arquivo"]
+    instance.dequeue()
+    sys.stdout.write(f"Arquivo {patch_file} removido com sucesso\n")
 
 
 def file_metadata(instance, position):
     try:
-        # Busca as informações do arquivo na posição especificada na fila
-        metadata = instance.search(position)
-
-        # Mostra as informações do arquivo via stdout
-        print(metadata)
+        file = instance.search(position)
+        return sys.stdout.write(str(file))
     except IndexError:
-        print("Posição inválida", file=sys.stderr)
-
-
-# Exemplo de uso:
-# file_metadata(minha_fila, 0)
+        return sys.stderr.write("Posição inválida\n")
